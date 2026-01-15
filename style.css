@@ -794,6 +794,9 @@ ul.terms-list li {
 .how-it-works .container {
     width: 92%;
 }
+	.item {
+    padding: 1rem;
+}
  }
 
 @media(min-width: 992px){
@@ -829,6 +832,7 @@ ul.terms-list li {
            color: #2e2a39;
        }
   }
+
 
 
 
