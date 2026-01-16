@@ -4,6 +4,13 @@ console.log("✅ attribution.js LOADED — fbclid persistence active");
 (function () {
   const KEY = "fbclid";
 
+  // ✅ Allow fbclid to be passed to Bitely checkout
+  const ALLOWED_EXTERNAL_HOSTS = new Set([
+    "app.bitely.com.au",
+    "bitely.com.au",
+    "www.bitely.com.au"
+  ]);
+
   // 1) Store fbclid from URL if present
   const params = new URLSearchParams(window.location.search);
   const incoming = params.get(KEY);
@@ -12,7 +19,7 @@ console.log("✅ attribution.js LOADED — fbclid persistence active");
   const fbclid = localStorage.getItem(KEY);
   if (!fbclid) return;
 
-  // 2) Append fbclid to all INTERNAL links (same site)
+  // 2) Append fbclid to INTERNAL links + Bitely checkout links
   document.querySelectorAll("a[href]").forEach((link) => {
     const href = link.getAttribute("href");
     if (!href) return;
@@ -32,8 +39,13 @@ console.log("✅ attribution.js LOADED — fbclid persistence active");
       return;
     }
 
-    // Only rewrite same-origin links (internal navigation)
-    if (url.origin !== window.location.origin) return;
+    const isSameOrigin = url.origin === window.location.origin;
+    const isAllowedExternal = ALLOWED_EXTERNAL_HOSTS.has(url.host);
+
+    // Only rewrite:
+    // - internal links, OR
+    // - Bitely checkout links
+    if (!isSameOrigin && !isAllowedExternal) return;
 
     // Don't overwrite if already present
     if (url.searchParams.has(KEY)) return;
@@ -46,7 +58,7 @@ console.log("✅ attribution.js LOADED — fbclid persistence active");
 
     link.setAttribute(
       "href",
-      isRelative
+      isRelative && isSameOrigin
         ? url.pathname + url.search + url.hash
         : url.toString()
     );
