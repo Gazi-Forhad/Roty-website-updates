@@ -1,3 +1,6 @@
+// ✅ DEPLOYMENT CHECK
+console.log("✅ attribution.js LOADED — fbclid persistence active");
+
 (function () {
   const KEY = "fbclid";
 
@@ -40,9 +43,12 @@
     // Keep relative links relative where possible
     const isRelative =
       !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(href) && !href.startsWith("//");
+
     link.setAttribute(
       "href",
-      isRelative ? url.pathname + url.search + url.hash : url.toString()
+      isRelative
+        ? url.pathname + url.search + url.hash
+        : url.toString()
     );
   });
 })();
