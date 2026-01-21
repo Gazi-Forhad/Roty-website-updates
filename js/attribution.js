@@ -1,9 +1,11 @@
 // ✅ DEPLOYMENT CHECK
-console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
+console.log("✅ attribution.js LOADED — fbclid TTL (7 days)");
 
 (function () {
   const KEY = "fbclid_data";
-  const TTL_MS = 120 * 1000;
+
+  // ✅ 7-day click attribution window (Meta-like)
+  const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
   const ALLOWED_EXTERNAL_HOSTS = new Set([
     "app.bitely.com.au",
@@ -44,7 +46,7 @@ console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
 
   const stored = readStored();
 
-  // ✅ Only store on FIRST capture or if value changes
+  // ✅ Only store on first capture or when value changes
   if (incoming && (!stored || stored.value !== incoming)) {
     store(incoming);
   }
@@ -55,6 +57,7 @@ console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
     return;
   }
 
+  // ✅ Enforce 7-day expiry
   if (now() - active.ts > TTL_MS) {
     clear();
     return;
@@ -63,6 +66,7 @@ console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
   const fbclid = active.value;
   console.log("✅ fbclid active:", fbclid);
 
+  // ✅ Append fbclid to internal + Bitely links
   document.querySelectorAll("a[href]").forEach((link) => {
     const href = link.getAttribute("href");
     if (!href) return;
