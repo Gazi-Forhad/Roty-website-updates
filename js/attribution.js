@@ -3,11 +3,8 @@ console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
 
 (function () {
   const KEY = "fbclid_data";
-
-  // ⏱️ TEST MODE: 2 minutes
   const TTL_MS = 120 * 1000;
 
-  // ✅ Allow fbclid to be passed to Bitely checkout
   const ALLOWED_EXTERNAL_HOSTS = new Set([
     "app.bitely.com.au",
     "bitely.com.au",
@@ -34,7 +31,7 @@ console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
         ts: now()
       })
     );
-    console.log("📥 fbclid captured:", value);
+    console.log("📥 fbclid captured (first click):", value);
   }
 
   function clear() {
@@ -42,37 +39,34 @@ console.log("✅ attribution.js LOADED — fbclid TTL test mode (120s)");
     console.log("🧹 fbclid expired — cleared");
   }
 
-  // 1️⃣ Capture fbclid from URL
   const params = new URLSearchParams(window.location.search);
   const incoming = params.get("fbclid");
 
-  if (incoming) {
+  const stored = readStored();
+
+  // ✅ Only store on FIRST capture or if value changes
+  if (incoming && (!stored || stored.value !== incoming)) {
     store(incoming);
   }
 
-  // 2️⃣ Load stored value
-  const stored = readStored();
-
-  if (!stored) {
+  const active = readStored();
+  if (!active) {
     console.log("ℹ️ no fbclid stored");
     return;
   }
 
-  // 3️⃣ Expiry check
-  if (now() - stored.ts > TTL_MS) {
+  if (now() - active.ts > TTL_MS) {
     clear();
     return;
   }
 
-  const fbclid = stored.value;
+  const fbclid = active.value;
   console.log("✅ fbclid active:", fbclid);
 
-  // 4️⃣ Append fbclid to INTERNAL + Bitely links
   document.querySelectorAll("a[href]").forEach((link) => {
     const href = link.getAttribute("href");
     if (!href) return;
 
-    // Skip non-page links
     if (
       href.startsWith("#") ||
       href.startsWith("mailto:") ||
