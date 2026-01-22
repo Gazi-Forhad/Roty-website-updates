@@ -1,5 +1,5 @@
 // ✅ DEPLOYMENT CHECK
-console.log("✅ attribution.js LOADED — fbclid TTL (7 days)");
+console.log("✅ attribution.js LOADED — fbclid TTL (7 days) + loader baton");
 
 (function () {
   const KEY = "fbclid_data";
@@ -12,6 +12,10 @@ console.log("✅ attribution.js LOADED — fbclid TTL (7 days)");
     "bitely.com.au",
     "www.bitely.com.au"
   ]);
+
+  // ✅ Loader baton params (for Bitely to show loader on arrival)
+  const LOADER_PARAM = "showAppLoader"; // Bitely header checks showAppLoader=1
+  const LOADER_TS_PARAM = "lbts";       // timestamp for short validity window
 
   function now() {
     return Date.now();
@@ -41,9 +45,9 @@ console.log("✅ attribution.js LOADED — fbclid TTL (7 days)");
     console.log("🧹 fbclid expired — cleared");
   }
 
+  // --- capture incoming fbclid ---
   const params = new URLSearchParams(window.location.search);
   const incoming = params.get("fbclid");
-
   const stored = readStored();
 
   // ✅ Only store on first capture or when value changes
@@ -51,22 +55,20 @@ console.log("✅ attribution.js LOADED — fbclid TTL (7 days)");
     store(incoming);
   }
 
-  const active = readStored();
-  if (!active) {
-    console.log("ℹ️ no fbclid stored");
-    return;
-  }
+  // --- read active fbclid (may be null) ---
+  let active = readStored();
 
-  // ✅ Enforce 7-day expiry
-  if (now() - active.ts > TTL_MS) {
+  // ✅ Enforce 7-day expiry (only if we actually have one stored)
+  if (active && now() - active.ts > TTL_MS) {
     clear();
-    return;
+    active = null;
   }
 
-  const fbclid = active.value;
-  console.log("✅ fbclid active:", fbclid);
+  const fbclid = active?.value || null;
+  if (fbclid) console.log("✅ fbclid active:", fbclid);
+  else console.log("ℹ️ no fbclid stored (still patching Bitely loader baton)");
 
-  // ✅ Append fbclid to internal + Bitely links
+  // ✅ Append fbclid (if present) + loader baton (always) to internal + Bitely links
   document.querySelectorAll("a[href]").forEach((link) => {
     const href = link.getAttribute("href");
     if (!href) return;
@@ -90,9 +92,19 @@ console.log("✅ attribution.js LOADED — fbclid TTL (7 days)");
 
     if (!isSameOrigin && !isAllowedExternal) return;
 
-    if (url.searchParams.has("fbclid")) return;
+    // ✅ If this is a Bitely link, append loader baton for cross-domain transitions
+    // (This will be ignored by Bitely unless you also update the Bitely header script.)
+    if (isAllowedExternal) {
+      if (!url.searchParams.has(LOADER_PARAM)) {
+        url.searchParams.set(LOADER_PARAM, "1");
+        url.searchParams.set(LOADER_TS_PARAM, String(Date.now()));
+      }
+    }
 
-    url.searchParams.set("fbclid", fbclid);
+    // ✅ Append fbclid only if we have one and it isn't already present
+    if (fbclid && !url.searchParams.has("fbclid")) {
+      url.searchParams.set("fbclid", fbclid);
+    }
 
     const isRelative =
       !/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(href) && !href.startsWith("//");
