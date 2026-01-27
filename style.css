@@ -254,6 +254,9 @@ a.btn:hover{
 /*  ===========================
     ======== menu week area ======== 
     ============================ */
+    .week-list{
+        cursor: pointer;
+    }
 .tab-content{
     border-radius: 1.4rem;
 }
@@ -632,7 +635,16 @@ h1.about-hero-title {
     font-size: 1.6rem;
     line-height: 3rem;
 }
-
+img.mfp-img {
+    margin: auto;
+}
+button.mfp-close {
+    border: none;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 100px;
+    font-size: 3rem;
+}
 /* padding-bottom and top for image */
 .mfp-no-margins img.mfp-img {
 	padding: 0;
@@ -764,12 +776,14 @@ ul.terms-list li {
             rgba(255, 255, 255, 0) 100%
         );
     }
-    ul.nav.nav-tabs {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 10px;
-    }
+ul.nav.nav-tabs {
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 10px;
+    row-gap: 10px;
+}
+.tab-content {
+    padding: 0 !important;
+}
 
     ul.nav.nav-tabs::-webkit-scrollbar {
         display: none;
@@ -794,8 +808,11 @@ ul.terms-list li {
 .how-it-works .container {
     width: 92%;
 }
-	.item {
-    padding: 1rem;
+.tiffins-container{
+    display: none;
+}
+.tiffins{
+    padding: 6rem  0rem 0rem 0rem;
 }
  }
 
@@ -832,7 +849,6 @@ ul.terms-list li {
            color: #2e2a39;
        }
   }
-
 
 
 
